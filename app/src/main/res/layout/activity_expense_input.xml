@@ -28,11 +28,6 @@
         </FrameLayout>
 
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="fill_parent"
-            android:background="@android:color/holo_blue_light" />
-
         <EditText
             android:layout_width="0dp"
             android:id="@+id/input_cash_edit_text"
