@@ -1,0 +1,96 @@
+<resources>
+    <string name="app_name">KanakkPusthakam</string>
+
+    <!--Title of the add trip dialog-->
+    <string name="add_trip_dialog_title">Start new trip</string>
+
+    <!--Title of the add trip dialog-->
+    <string name="add_expense_dialog_title">Add new expense</string>
+
+    <!--Hint of the add  trip dialog-->
+    <string name="add_trip_dialog_hint">Trip title</string>
+
+    <!--Hint of the add  trip dialog-->
+    <string name="add_expense_dialog_hint">Expense title</string>
+
+    <!--negative option of add trip dialog-->
+    <string name="cancel">cancel</string>
+
+    <!--positive option of add trip dialog-->
+    <string name="start">Start</string>
+
+    <!--Title for tick mark menu item-->
+    <string name="done">Done</string>
+
+    <!--Title of the AddMember Activity-->
+    <string name="add_member">Add member</string>
+
+    <!--Text for the add button in Add member-->
+    <string name="add">Add</string>
+
+    <!--Text for the clear button in Add member-->
+    <string name="clear">Clear</string>
+
+    <!--Text beneath number of members-->
+    <string name="members">Members</string>
+
+    <!--Hint for the text input in the add trip dialog-->
+    <string name="hint">New member name.</string>
+
+    <!--Text in the empty view of the TripHistory Page.-->
+    <string name="trips_empty_text_one">Looks like you haven\'t started any trips yet.</string>
+    <string name="trips_empty_text_two">Press the floating + to get started.</string>
+
+    <!--Text in the empty view of the TripHistory Page.-->
+    <string name="members_empty_text_one">Looks like you\'re on your own.</string>
+    <string name="members_empty_text_two">Press the button on the top right to add new members.</string>
+
+
+    <!--Text in the empty view of the TripHistory Page.-->
+    <string name="expense_empty_text_one">Looks like you haven\'t had any expenses yet.</string>
+    <string name="expense_empty_text_two">Press the floating + to start spending.</string>
+
+    <!--Headings of the table in membersFragment-->
+    <string name="name">Name</string>
+    <string name="cash">Cash Spent</string>
+    <string name="cash_rolled">Cash</string>
+    <string name="expense">Expense</string>
+    <string name="balance">Balance</string>
+
+
+    <string name="title_activity_main">MainActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+
+    <string name="no_member_name_toast">Please select a member name from the drop-down list.</string>
+    <string name="no_cash_toast">You haven\'t entered any amount.</string>
+
+    <string name="preview">Preview</string>
+
+    <string name="delete">Delete</string>
+
+    <string name="delete_all_expenses">Delete all expenses</string>
+
+    <string name="expense_deleted">Expense deleted</string>
+
+    <string name="member_deleted">Member deleted</string>
+
+    <string name="member_not_deleted">Member has unsettled expenses, cannot delete.</string>
+
+    <string name="delete_dialog_message">Are you sure you want to delete this?</string>
+
+    <string name="involvement_help">Select the members who were involved in the expense.</string>
+
+    <string name="select_all">Select all.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_involvement">InvolvementActivity</string>
+
+
+</resources>
