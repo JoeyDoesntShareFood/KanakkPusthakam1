@@ -160,7 +160,7 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
         builder.create().show();
     }
 
-    private void getIDsFromDB(){
+    private void getIDsFromDB() {
 
         mIDs = new long[getNumberOfMembers()];
 
@@ -181,26 +181,29 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
 
     private void deleteExpense(long id) {
         String selection = TripContract.ExpenseEntry._ID + "=?";
-        String[] selectionArgs = new String[] {String.valueOf(id)};
+        String[] selectionArgs = new String[]{String.valueOf(id)};
         Cursor cursor = getActivity().getContentResolver().query(TripContract.ExpenseEntry.CONTENT_URI, null, selection, selectionArgs, null);
         int cashRolledColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_CASH_ROLLED);
         int expenseColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_EXPENSE);
+        int involvementColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_IS_INVLOVED);
         Log.v("ExpenseFragment", "onCreate: cashRolledColumnIndex: " + cashRolledColumnIndex);
         cursor.moveToFirst();
         String cashString = cursor.getString(cashRolledColumnIndex);
         int[] cash = TripUtils.intArrayFromString(cashString, mNumberOfMembers);
         int expense = cursor.getInt(expenseColumnIndex);
+        int[] involvement = TripUtils.intArrayFromString(cursor.getString(involvementColumnIndex), mNumberOfMembers);
         cursor.close();
 
 
         cash = TripUtils.invertArray(cash);
         expense = -expense;
         getIDsFromDB();
-        for (int i =0 ; i<mIDs.length; i++){
+        for (int i = 0; i < mIDs.length; i++) {
             Uri uri = ContentUris.withAppendedId(TripContract.MembersEntry.CONTENT_URI, mIDs[i]);
             ContentValues values = new ContentValues();
             values.put(TripContract.MembersEntry.COLUMN_CASH_SPENT, cash[i]);
-            values.put(TripContract.MembersEntry.COLUMN_EXPENSE, expense);
+            if (involvement[i] == 1)
+                values.put(TripContract.MembersEntry.COLUMN_EXPENSE, expense);
             getActivity().getContentResolver().update(uri, values, null, null);
         }
 
@@ -208,25 +211,6 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
         getActivity().getContentResolver().delete(uri, null, null);
         Toast.makeText(getContext(), R.string.expense_deleted, Toast.LENGTH_SHORT).show();
     }
-
-//    private int[] intArrayFromString(String s, int strength){
-//        String splits[] = s.split(",");
-//        double[] doubles = new double[strength];
-//        int[] ints = new int[strength];
-//        for (int i =0; i<doubles.length; i++){
-//            ints[i] = (int) Double.parseDouble(splits[i]);
-//            Log.v("Expense Fragment", " " + ints[i]);
-//        }
-//        return ints;
-//    }
-//
-//    private int[] invertArray(int[] ints){
-//        for (int i=0; i<ints.length; i++){
-//            ints[i] = - ints[i];
-//            Log.v("Expense Fragment", "invertArray: Inverted Array: " + ints[i]);
-//        }
-//        return ints;
-//    }
 
 
     @NonNull
@@ -247,7 +231,6 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
     public void onLoaderReset(@NonNull Loader loader) {
         mExpenseAdapter.swapCursor(null);
     }
-
 
 
     private int getNumberOfMembers() {
