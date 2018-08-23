@@ -54,15 +54,11 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
         mNumberOfMembers = getNumberOfMembers();
 
 
-
-
-        expenses = new ArrayList<>();
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mCashRolled = new double[mNumberOfMembers];
 
-        mAdapter = new ExpenseInputAdapter(this, null);
+        mAdapter = new ExpenseInputAdapter(this, null, mIDs);
         getSupportLoaderManager().initLoader(0, null, this);
         final ListView listView = (ListView) findViewById(R.id.expense_input_list_view);
         listView.setAdapter(mAdapter);
@@ -117,6 +113,15 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
         Cursor cursor = getContentResolver().query(TripContract.MembersEntry.CONTENT_URI, null, selection, selectionArgs, null);
 
         int members = cursor.getCount();
+        mIDs = new long[members];
+        int IDcolumnIndex = cursor.getColumnIndex(TripContract.MembersEntry._ID);
+        int i =0;
+        while (cursor.moveToNext()){
+            mIDs[i] = cursor.getLong(IDcolumnIndex);
+            i++;
+        }
+
+
 
         cursor.close();
 
@@ -135,6 +140,7 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
             case R.id.save_menu_item:
                 long id = ContentUris.parseId(mTripUri);
                 String expenseTitle = getIntent().getStringExtra(TripContract.ExpenseEntry.COLUMN_ITEM);
+                mCashRolled = mAdapter.getCashRolled();
                 Intent intent = new Intent(this, InvolvementActivity.class);
                 intent.putExtra(TripContract.TripsEntry._ID, id);
                 intent.putExtra(TripContract.MembersEntry.COLUMN_NAME, mMembers);
