@@ -5,6 +5,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,7 +30,7 @@ import com.example.jyothisp.kanakkpusthakam.data.TripContract;
 
 import java.util.ArrayList;
 
-public class ExpenseInputActivity extends AppCompatActivity {
+public class ExpenseInputActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     double[] mCashRolled;
     Uri mTripUri;
@@ -35,21 +40,21 @@ public class ExpenseInputActivity extends AppCompatActivity {
     String[] mMembers;
     ArrayList<Expense> expenses;
 
+    private ExpenseInputAdapter mAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_input);
-        setTitle(getResources().getString(R.string.add_member));
+        setTitle(getResources().getString(R.string.add_expense_dialog_title));
 
         mTripUri = getIntent().getData();
 
         mNumberOfMembers = getNumberOfMembers();
 
-        mMemberPosition = -1;
 
 
-        setupSpinner();
 
         expenses = new ArrayList<>();
 
@@ -57,60 +62,16 @@ public class ExpenseInputActivity extends AppCompatActivity {
 
         mCashRolled = new double[mNumberOfMembers];
 
+        mAdapter = new ExpenseInputAdapter(this, null);
+        getSupportLoaderManager().initLoader(0, null, this);
         final ListView listView = (ListView) findViewById(R.id.expense_input_list_view);
-        listView.setItemsCanFocus(true);
+        listView.setAdapter(mAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                deleteExpense(listView, position);
-            }
-        });
-
-        Button addButton = (Button) findViewById(R.id.input_add_button);
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addExpense();
-            }
-        });
 
     }
 
 
-    private void deleteExpense(final ListView listView, final int position){
-        showDeleteDialog(new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Expense expense = (Expense) listView.getItemAtPosition(position);
-                String name = expense.getmName();
-                int index = getIndexByName(name);
-                expenses.remove(index);
-                for (index = 0; index<mNumberOfMembers; index++){
-                    if (name.equals(mMembers[index]))
-                        break;
-                }
-                mCashRolled[index] = 0;
-                updateUI();
-            }
-        });
-    }
 
-    private void showDeleteDialog(DialogInterface.OnClickListener onClickListener) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.delete);
-        builder.setMessage(R.string.delete_dialog_message);
-        builder.setPositiveButton(R.string.delete, onClickListener);
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (dialog != null)
-                    dialog.dismiss();
-            }
-        });
-
-        builder.create().show();
-    }
 
 
     private void addExpense(){
@@ -133,7 +94,6 @@ public class ExpenseInputActivity extends AppCompatActivity {
                     expenses.remove(index);
                     expenses.add(new Expense(mMembers[mMemberPosition], mCashRolled[mMemberPosition]));
                 }
-                updateUI();
                 cashEditText.setText("");
             }
 
@@ -150,57 +110,6 @@ public class ExpenseInputActivity extends AppCompatActivity {
     }
 
 
-    private void updateUI() {
-        ListView listView = (ListView) findViewById(R.id.expense_input_list_view);
-        ExpenseInputAdapter adapter = new ExpenseInputAdapter(this, expenses);
-        listView.setAdapter(adapter);
-    }
-
-    private void setupSpinner() {
-
-        //TODO: Refactor code to get the position using ID instead of name.
-
-        String[] members = new String[mNumberOfMembers];
-        mIDs = new long[mNumberOfMembers];
-
-        String selection = TripContract.MembersEntry.TRIP_ID + "=?";
-        String[] selectionArgs = new String[]{String.valueOf(ContentUris.parseId(mTripUri))};
-        Cursor cursor = getContentResolver().query(TripContract.MembersEntry.CONTENT_URI, null, selection, selectionArgs, null);
-        int nameColumnIndex = cursor.getColumnIndexOrThrow(TripContract.MembersEntry.COLUMN_NAME);
-        int idColumnIndex = cursor.getColumnIndexOrThrow(TripContract.MembersEntry._ID);
-
-        int i = 0;
-        while (cursor.moveToNext()) {
-            members[i] = cursor.getString(nameColumnIndex);
-            mIDs[i] = cursor.getLong(idColumnIndex);
-            i++;
-        }
-
-        mMembers = members;
-
-        cursor.close();
-
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, members);
-
-        Spinner spinner = (Spinner) findViewById(R.id.members_spinner);
-
-        spinner.setAdapter(adapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mMemberPosition = position;
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                mMemberPosition = -1;
-            }
-        });
-
-    }
 
     private int getNumberOfMembers() {
         String selection = TripContract.MembersEntry.TRIP_ID + "=?";
@@ -249,6 +158,25 @@ public class ExpenseInputActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SummaryActivity.class);
         intent.setData(mTripUri);
         startActivity(intent);
+    }
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+        long tripID = ContentUris.parseId(mTripUri);
+        String selection = TripContract.MembersEntry.TRIP_ID + "=?";
+        String[] selectionArgs = new String[]{("" + tripID)};
+        return new CursorLoader(this, TripContract.MembersEntry.CONTENT_URI, null, selection, selectionArgs, null);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+        mAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
 }
 

@@ -3,15 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
+    android:layout_height="48dp"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:padding="16dp">
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:orientation="horizontal">
 
-    <ImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        app:srcCompat="@drawable/user" />
 
     <TextView
         android:layout_marginStart="16dp"
@@ -19,23 +16,19 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:layout_weight="1"
+        android:layout_weight="3"
         android:textColor="@color/listItemPrimaryTextColor"
-        tools:text="Karthyayini Venugopal" />
+        tools:text="Karthyayini " />
 
-    <TextView
-        android:id="@+id/input_cash_text_view"
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/input_cash_edit_text"
+        android:layout_width="0dp"
+        android:layout_weight="2"
         android:textColor="@color/listItemPrimaryTextColor"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:textSize="16sp"
-        android:textStyle="bold"
-        tools:text="₹48"
+        android:inputType="numberDecimal"
+        android:hint="@string/enter_cash"
         android:layout_marginEnd="16dp"/>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@android:drawable/ic_delete" />
 
 </LinearLayout>
