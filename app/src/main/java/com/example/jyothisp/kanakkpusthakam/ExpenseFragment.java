@@ -50,6 +50,8 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
 
     Uri mTripUri;
 
+    private int mNumberOfMembers;
+
     private View mEmptyView;
 
     private long[] mIDs;
@@ -64,6 +66,7 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
 
 
         mTripUri = getActivity().getIntent().getData();
+        mNumberOfMembers = getNumberOfMembers();
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) rootView.findViewById(R.id.trip_history_fab);
         floatingActionButton.setImageResource(R.drawable.addcoins);
@@ -185,12 +188,12 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
         Log.v("ExpenseFragment", "onCreate: cashRolledColumnIndex: " + cashRolledColumnIndex);
         cursor.moveToFirst();
         String cashString = cursor.getString(cashRolledColumnIndex);
-        int[] cash = intArrayFromString(cashString);
+        int[] cash = TripUtils.intArrayFromString(cashString, mNumberOfMembers);
         int expense = cursor.getInt(expenseColumnIndex);
         cursor.close();
 
 
-        cash = invertArray(cash);
+        cash = TripUtils.invertArray(cash);
         expense = -expense;
         getIDsFromDB();
         for (int i =0 ; i<mIDs.length; i++){
@@ -206,24 +209,24 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
         Toast.makeText(getContext(), R.string.expense_deleted, Toast.LENGTH_SHORT).show();
     }
 
-    private int[] intArrayFromString(String s){
-        String splits[] = s.split(",");
-        double[] doubles = new double[getNumberOfMembers()];
-        int[] ints = new int[getNumberOfMembers()];
-        for (int i =0; i<doubles.length; i++){
-            ints[i] = (int) Double.parseDouble(splits[i]);
-            Log.v("Expense Fragment", " " + ints[i]);
-        }
-        return ints;
-    }
-
-    private int[] invertArray(int[] ints){
-        for (int i=0; i<ints.length; i++){
-            ints[i] = - ints[i];
-            Log.v("Expense Fragment", "invertArray: Inverted Array: " + ints[i]);
-        }
-        return ints;
-    }
+//    private int[] intArrayFromString(String s, int strength){
+//        String splits[] = s.split(",");
+//        double[] doubles = new double[strength];
+//        int[] ints = new int[strength];
+//        for (int i =0; i<doubles.length; i++){
+//            ints[i] = (int) Double.parseDouble(splits[i]);
+//            Log.v("Expense Fragment", " " + ints[i]);
+//        }
+//        return ints;
+//    }
+//
+//    private int[] invertArray(int[] ints){
+//        for (int i=0; i<ints.length; i++){
+//            ints[i] = - ints[i];
+//            Log.v("Expense Fragment", "invertArray: Inverted Array: " + ints[i]);
+//        }
+//        return ints;
+//    }
 
 
     @NonNull
