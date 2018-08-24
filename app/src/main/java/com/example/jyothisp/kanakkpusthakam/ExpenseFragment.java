@@ -36,21 +36,14 @@ import com.example.jyothisp.kanakkpusthakam.data.TripContract;
  */
 public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    // Required empty public constructor
+    public ExpenseFragment() {}
 
-    public ExpenseFragment() {
-        // Required empty public constructor
-    }
-
-    ExpenseCursorAdapter mExpenseAdapter;
-
-    TextInputEditText mEditText;
-
-    Uri mTripUri;
-
+    private ExpenseCursorAdapter mExpenseAdapter;
+    private TextInputEditText mEditText;
+    private Uri mTripUri;
     private int mNumberOfMembers;
-
     private View mEmptyView;
-
     private long[] mIDs;
 
     @Override
@@ -59,12 +52,38 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
         // Inflate the layout for this fragment
         final View rootView = inflater.inflate(R.layout.fragment_trip_history, container, false);
 
+//        Initializing the CursorLoader.
         getActivity().getSupportLoaderManager().initLoader(1, null, this);
 
 
         mTripUri = getActivity().getIntent().getData();
         mNumberOfMembers = getNumberOfMembers();
+        setUpFAB(rootView);
 
+
+        ListView listView = (ListView) rootView.findViewById(R.id.fragment_list_view);
+        mEmptyView = rootView.findViewById(R.id.fragment_empty_view);
+        listView.setEmptyView(mEmptyView);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
+                showDeleteDialog(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteExpense(id);
+                    }
+                });
+            }
+        });
+
+        mExpenseAdapter = new ExpenseCursorAdapter(getContext(), null);
+        listView.setAdapter(mExpenseAdapter);
+
+
+        return rootView;
+    }
+
+    private void setUpFAB(final View rootView){
         FloatingActionButton floatingActionButton = (FloatingActionButton) rootView.findViewById(R.id.trip_history_fab);
         floatingActionButton.setImageResource(R.drawable.addcoins);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -88,28 +107,6 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
                 }
             }
         });
-        mEmptyView = rootView.findViewById(R.id.fragment_empty_view);
-        ListView listView = (ListView) rootView.findViewById(R.id.fragment_list_view);
-        listView.setEmptyView(mEmptyView);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
-                Log.v("ExpenseFragment", "onCreate: " + id);
-                showDeleteDialog(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        deleteExpense(id);
-                    }
-                });
-            }
-        });
-
-        mExpenseAdapter = new ExpenseCursorAdapter(getContext(), null);
-
-        listView.setAdapter(mExpenseAdapter);
-
-
-        return rootView;
     }
 
 

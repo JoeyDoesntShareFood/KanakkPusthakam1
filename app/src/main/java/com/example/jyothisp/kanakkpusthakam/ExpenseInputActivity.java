@@ -25,14 +25,9 @@ import java.util.ArrayList;
 
 public class ExpenseInputActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    double[] mCashRolled;
-    Uri mTripUri;
-    int mNumberOfMembers;
-    int mMemberPosition;
-    long[] mIDs;
-    String[] mMembers;
-    ArrayList<Expense> expenses;
-
+    private  double[] mCashRolled;
+    private Uri mTripUri;
+    private long[] mIDs;
     private ExpenseInputAdapter mAdapter;
 
 
@@ -41,61 +36,16 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_input);
         setTitle(getResources().getString(R.string.add_expense_dialog_title));
-
-        mTripUri = getIntent().getData();
-
-        mNumberOfMembers = getNumberOfMembers();
-
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mCashRolled = new double[mNumberOfMembers];
-
+        mTripUri = getIntent().getData();
+        mCashRolled = new double[getNumberOfMembers()];
         mAdapter = new ExpenseInputAdapter(this, null, mIDs);
         getSupportLoaderManager().initLoader(0, null, this);
         final ListView listView = (ListView) findViewById(R.id.expense_input_list_view);
         listView.setAdapter(mAdapter);
 
 
-    }
-
-
-
-
-
-    private void addExpense(){
-        EditText cashEditText = (EditText) findViewById(R.id.input_cash_edit_text);
-        String cashText = cashEditText.getText().toString().trim();
-
-
-        if (mMemberPosition == -1) {
-            Toast.makeText(this, R.string.no_member_name_toast, Toast.LENGTH_SHORT).show();
-        } else {
-
-            if (cashText.equals(""))
-                Toast.makeText(this, R.string.no_cash_toast, Toast.LENGTH_SHORT).show();
-            else {
-                mCashRolled[mMemberPosition] += Integer.parseInt(cashText);
-                int index = getIndexByName(mMembers[mMemberPosition]);
-                if (index == -1) {
-                    expenses.add(new Expense(mMembers[mMemberPosition], mCashRolled[mMemberPosition]));
-                } else {
-                    expenses.remove(index);
-                    expenses.add(new Expense(mMembers[mMemberPosition], mCashRolled[mMemberPosition]));
-                }
-                cashEditText.setText("");
-            }
-
-        }
-    }
-
-    private int getIndexByName(String name) {
-        for (int i = 0; i < expenses.size(); i++) {
-            if (expenses.get(i).getmName().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
 
@@ -107,19 +57,18 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
 
         int members = cursor.getCount();
         mIDs = new long[members];
-        int IDcolumnIndex = cursor.getColumnIndex(TripContract.MembersEntry._ID);
+        int IDColumnIndex = cursor.getColumnIndex(TripContract.MembersEntry._ID);
         int i =0;
         while (cursor.moveToNext()){
-            mIDs[i] = cursor.getLong(IDcolumnIndex);
+            mIDs[i] = cursor.getLong(IDColumnIndex);
             i++;
         }
-
-
 
         cursor.close();
 
         return members;
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -131,27 +80,7 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.save_menu_item:
-                long id = ContentUris.parseId(mTripUri);
-                String expenseTitle = getIntent().getStringExtra(TripContract.ExpenseEntry.COLUMN_ITEM);
-                mCashRolled = mAdapter.getCashRolled();
-                int f =0;
-                for (int i=0; i<mCashRolled.length; i++){
-                    if (mCashRolled[i] > 0)
-                        f=1;
-                }
-                if (f == 0){
-                    Toast.makeText(this, R.string.no_money, Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-                Intent intent = new Intent(this, InvolvementActivity.class);
-                intent.putExtra(TripContract.TripsEntry._ID, id);
-                intent.putExtra(TripContract.MembersEntry.COLUMN_NAME, mMembers);
-                intent.putExtra(TripContract.ExpenseEntry.COLUMN_CASH_ROLLED, mCashRolled);
-                intent.putExtra(TripContract.ExpenseEntry.COLUMN_ITEM, expenseTitle);
-                intent.putExtra("ids", mIDs);
-                intent.setData(null);
-                startActivity(intent);
-                return true;
+                return gotoInvolvement();
             case android.R.id.home:
                 onBackPressed();
                 return true;
@@ -159,6 +88,28 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean gotoInvolvement(){
+        long id = ContentUris.parseId(mTripUri);
+        String expenseTitle = getIntent().getStringExtra(TripContract.ExpenseEntry.COLUMN_ITEM);
+        mCashRolled = mAdapter.getCashRolled();
+        int f =0;
+        for (int i=0; i<mCashRolled.length; i++){
+            if (mCashRolled[i] > 0)
+                f=1;
+        }
+        if (f == 0){
+            Toast.makeText(this, R.string.no_money, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        Intent intent = new Intent(this, InvolvementActivity.class);
+        intent.putExtra(TripContract.TripsEntry._ID, id);
+        intent.putExtra(TripContract.ExpenseEntry.COLUMN_CASH_ROLLED, mCashRolled);
+        intent.putExtra(TripContract.ExpenseEntry.COLUMN_ITEM, expenseTitle);
+        intent.putExtra("ids", mIDs);
+        intent.setData(null);
+        startActivity(intent);
+        return true;
+    }
 
     @Override
     public void onBackPressed() {
