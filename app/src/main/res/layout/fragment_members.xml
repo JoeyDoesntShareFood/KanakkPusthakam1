@@ -73,6 +73,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:dividerHeight="0dp"
+        android:background="@drawable/table_stroke"
         android:layout_below="@id/table_header" />
 
     <LinearLayout
