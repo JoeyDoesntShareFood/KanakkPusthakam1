@@ -62,9 +62,70 @@ public class MembersFragment extends Fragment implements LoaderManager.LoaderCal
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View rootView = inflater.inflate(R.layout.fragment_members, container, false);
-
+        setHasOptionsMenu(true);
         mTripUri = getActivity().getIntent().getData();
+        setUpFAB(rootView);
 
+
+
+        getActivity().getSupportLoaderManager().initLoader(0, null, this).forceLoad();
+
+
+        ListView listView = (ListView) rootView.findViewById(R.id.member_list_view);
+        mEmptyView = rootView.findViewById(R.id.member_empty_view);
+        mEmptyView.setVisibility(View.INVISIBLE);
+        listView.setEmptyView(mEmptyView);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
+                showDeleteDialog(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteMember(id);
+                    }
+                });
+            }
+        });
+        mAdapter = new SummaryCursorAdapter(getContext(), null);
+        listView.setAdapter(mAdapter);
+
+
+        setupSnackBar(rootView);
+        if (isFirstTime()){
+            mSnackbar.show();
+            saveToSharedPrefs();
+        }
+
+        return rootView;
+    }
+
+    private boolean isFirstTime(){
+        prefs = getActivity().getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(MY_PREFS_KEY, true);
+
+    }
+
+    private void saveToSharedPrefs(){
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(MY_PREFS_KEY, false);
+        editor.apply();
+    }
+
+    private void setupSnackBar(View rootView){
+
+        mSnackbar = Snackbar.make(rootView.findViewById(R.id.coordinator), R.string.member_help, Snackbar.LENGTH_INDEFINITE);
+        mSnackbar.setAction("Got it", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSnackbar.dismiss();
+            }
+        });
+        View view = mSnackbar.getView();
+        TextView tv = view.findViewById(android.support.design.R.id.snackbar_text);
+        tv.setMaxLines(5);
+    }
+
+    private void setUpFAB(final View rootView){
         FloatingActionButton floatingActionButton = (FloatingActionButton) rootView.findViewById(R.id.members_fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,51 +148,7 @@ public class MembersFragment extends Fragment implements LoaderManager.LoaderCal
                 }
             }
         });
-
-        setHasOptionsMenu(true);
-        prefs = getActivity().getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
-        boolean isFirstTime = prefs.getBoolean(MY_PREFS_KEY, true);
-
-        getActivity().getSupportLoaderManager().initLoader(0, null, this).forceLoad();
-        ListView listView = (ListView) rootView.findViewById(R.id.member_list_view);
-        mEmptyView = rootView.findViewById(R.id.member_empty_view);
-        mEmptyView.setVisibility(View.INVISIBLE);
-        listView.setEmptyView(mEmptyView);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
-                showDeleteDialog(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        deleteMember(id);
-                    }
-                });
-            }
-        });
-        mAdapter = new SummaryCursorAdapter(getContext(), null);
-        listView.setAdapter(mAdapter);
-
-        mSnackbar = Snackbar.make(rootView.findViewById(R.id.coordinator), R.string.member_help, Snackbar.LENGTH_INDEFINITE);
-        mSnackbar.setAction("Got it", new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSnackbar.dismiss();
-            }
-        });
-        View view = mSnackbar.getView();
-        TextView tv = view.findViewById(android.support.design.R.id.snackbar_text);
-        tv.setMaxLines(5);
-
-        if (isFirstTime){
-            mSnackbar.show();
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean(MY_PREFS_KEY, false);
-            editor.apply();
-        }
-
-        return rootView;
     }
-
 
     private void showNewExpenseDialog(DialogInterface.OnClickListener onClickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());

@@ -32,7 +32,6 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
     private InvolvementCursorAdapter mAdapter;
     private double[] mCashRolled;
     private int[] mInvolvement;
-    private String[] mMembers;
     private long[] mIDs;
     private long tripID;
     private ListView mListView;
@@ -50,7 +49,6 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
         getSupportLoaderManager().initLoader(0, null, this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mCashRolled = getIntent().getDoubleArrayExtra(TripContract.ExpenseEntry.COLUMN_CASH_ROLLED);
-        mMembers = getIntent().getStringArrayExtra(TripContract.MembersEntry.COLUMN_NAME);
         mIDs = getIntent().getLongArrayExtra("ids");
         mInvolvement = new int[getNumberOfMembers()];
         listView.setAdapter(mAdapter);
