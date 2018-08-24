@@ -25,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -160,7 +159,7 @@ public class TripHistoryFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        getActivity().getMenuInflater().inflate(R.menu.add_member_menu, menu);
+        getActivity().getMenuInflater().inflate(R.menu.simple_done_menu, menu);
     }
 
     @Override
@@ -205,7 +204,8 @@ public class TripHistoryFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        mEmptyView.setVisibility(View.VISIBLE);
+        View view = mEmptyView.findViewById(R.id.container_empty_default);
+        view.setVisibility(View.VISIBLE);
         mAdapter.swapCursor(data);
     }
 

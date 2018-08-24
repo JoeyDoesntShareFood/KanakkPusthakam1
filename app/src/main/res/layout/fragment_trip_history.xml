@@ -1,62 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:id="@+id/coordinator"
     android:layout_height="match_parent"
     tools:context=".TripHistoryFragment">
 
     <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:orientation="vertical"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <ListView
                 android:id="@+id/fragment_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/involvement_help_text"
-                android:text="@string/involvement_help"
-                android:layout_margin="16dp"
                 android:layout_width="match_parent"
-                android:visibility="gone"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="@string/involvement_help"
+                android:visibility="gone" />
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/fragment_empty_view"
-            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center"
-            android:gravity="center_horizontal">
+            android:layout_gravity="center">
 
-            <ImageView
+            <LinearLayout
+                android:id="@+id/container_empty_default"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/breakdown"
-                android:layout_gravity="center"/>
-            <TextView
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="invisible">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/breakdown" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="@string/trips_empty_text_one"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="@string/trips_empty_text_two"
+                    android:textColor="@color/listItemPrimaryTextColor"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/container_empty_two"
                 android:layout_width="wrap_content"
-                android:textSize="16sp"
                 android:layout_height="wrap_content"
-                android:text="@string/trips_empty_text_one"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="@color/listItemPrimaryTextColor"
-                android:text="@string/trips_empty_text_two"/>
-        </LinearLayout>
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="invisible">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/no_money" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="@string/expense_empty_text_one"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="@string/expense_empty_text_two"
+                    android:textColor="@color/listItemPrimaryTextColor"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+        </FrameLayout>
+
 
     </FrameLayout>
 
@@ -67,7 +113,9 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
-        android:src="@drawable/add" />
+        android:src="@drawable/add"
+        app:layout_anchor="@+id/frameLayout"
+        app:layout_anchorGravity="right|bottom" />
 
 
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

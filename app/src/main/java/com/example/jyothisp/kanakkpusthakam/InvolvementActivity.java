@@ -103,9 +103,9 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
 
     private void addExpense() {
         String expenseName = getIntent().getStringExtra(TripContract.ExpenseEntry.COLUMN_ITEM);
-        String cashSpent = intArrayToString(mCashRolled);
+        String cashSpent = TripUtils.intArrayToString(mCashRolled);
         getInvolvement();
-        String involvement = intArrayToString(mInvolvement);
+        String involvement = TripUtils.intArrayToString(mInvolvement);
         int expense = (int) calcExpense();
         Log.v("Involvement fragment", "" + expense);
         Log.v("Involvement fragment", expenseName);
@@ -191,31 +191,6 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
-
-    private String intArrayToString(double[] intArray) {
-        String string = "";
-        int i;
-        for (i = 0; i < (intArray.length - 1); i++) {
-            string += intArray[i];
-            string += ",";
-        }
-        string += intArray[i];
-        Log.v("Involvement fragment1", string);
-
-        return string;
-    }
-
-    private String intArrayToString(int[] intArray) {
-        String string = "";
-        int i;
-        for (i = 0; i < (intArray.length - 1); i++) {
-            string += intArray[i];
-            string += ",";
-        }
-        string += intArray[i];
-        Log.v("Involvement fragment", string);
-        return string;
-    }
 
 
     @NonNull

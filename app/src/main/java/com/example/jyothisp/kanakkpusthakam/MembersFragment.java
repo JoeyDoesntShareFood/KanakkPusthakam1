@@ -2,15 +2,17 @@ package com.example.jyothisp.kanakkpusthakam;
 
 
 import android.content.ContentUris;
-import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -19,8 +21,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jyothisp.kanakkpusthakam.data.SummaryCursorAdapter;
@@ -40,21 +41,27 @@ import com.example.jyothisp.kanakkpusthakam.data.TripContract;
 public class MembersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 
-    SummaryCursorAdapter mAdapter;
-    EditText mEditText;
-    Uri mTripUri;
-    View mEmptyView;
+    private SummaryCursorAdapter mAdapter;
+    private EditText mEditText;
+    private Uri mTripUri;
+    private View mEmptyView;
+    private Snackbar mSnackbar;
 
     public MembersFragment() {
         // Required empty public constructor
     }
+
+    public static final String MY_PREFS_NAME = "MyPrefsFile";
+    public static final String MY_PREFS_KEY = "FirstTime?";
+
+    private SharedPreferences prefs;
 
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_members, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_members, container, false);
 
         mTripUri = getActivity().getIntent().getData();
 
@@ -62,20 +69,28 @@ public class MembersFragment extends Fragment implements LoaderManager.LoaderCal
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showNewExpenseDialog(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                if (getNumberOfMembers() == 0)
+                    Snackbar.make(rootView.findViewById(R.id.coordinator), R.string.no_members, Snackbar.LENGTH_SHORT).show();
+                else {
+                    showNewExpenseDialog(new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-                        String expenseTitle = mEditText.getText().toString().trim();
+                            String expenseTitle = mEditText.getText().toString().trim();
 
-                        Intent intent = new Intent(getActivity(), ExpenseInputActivity.class);
-                        intent.setData(mTripUri);
-                        intent.putExtra(TripContract.ExpenseEntry.COLUMN_ITEM, expenseTitle);
-                        startActivity(intent);
-                    }
-                });
+                            Intent intent = new Intent(getActivity(), ExpenseInputActivity.class);
+                            intent.setData(mTripUri);
+                            intent.putExtra(TripContract.ExpenseEntry.COLUMN_ITEM, expenseTitle);
+                            startActivity(intent);
+                        }
+                    });
+                }
             }
         });
+
+        setHasOptionsMenu(true);
+        prefs = getActivity().getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
+        boolean isFirstTime = prefs.getBoolean(MY_PREFS_KEY, true);
 
         getActivity().getSupportLoaderManager().initLoader(0, null, this).forceLoad();
         ListView listView = (ListView) rootView.findViewById(R.id.member_list_view);
@@ -96,9 +111,26 @@ public class MembersFragment extends Fragment implements LoaderManager.LoaderCal
         mAdapter = new SummaryCursorAdapter(getContext(), null);
         listView.setAdapter(mAdapter);
 
+        mSnackbar = Snackbar.make(rootView.findViewById(R.id.coordinator), R.string.member_help, Snackbar.LENGTH_INDEFINITE);
+        mSnackbar.setAction("Got it", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSnackbar.dismiss();
+            }
+        });
+        View view = mSnackbar.getView();
+        TextView tv = view.findViewById(android.support.design.R.id.snackbar_text);
+        tv.setMaxLines(5);
+
+        if (isFirstTime){
+            mSnackbar.show();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(MY_PREFS_KEY, false);
+            editor.apply();
+        }
+
         return rootView;
     }
-
 
 
     private void showNewExpenseDialog(DialogInterface.OnClickListener onClickListener) {
@@ -133,8 +165,6 @@ public class MembersFragment extends Fragment implements LoaderManager.LoaderCal
     }
 
 
-
-
     private void showDeleteDialog(DialogInterface.OnClickListener onClickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(R.string.delete);
@@ -152,20 +182,39 @@ public class MembersFragment extends Fragment implements LoaderManager.LoaderCal
     }
 
 
-    private void deleteMember(long id){
+    private void deleteMember(long id) {
         Uri uri = ContentUris.withAppendedId(TripContract.MembersEntry.CONTENT_URI, id);
         Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null, null);
         int balanceColumnIndex = cursor.getColumnIndex(TripContract.MembersEntry.COLUMN_BALANCE);
         cursor.moveToFirst();
         int balance = cursor.getInt(balanceColumnIndex);
         cursor.close();
-        if (balance == 0){
+        if (balance == 0) {
             getActivity().getContentResolver().delete(uri, null, null);
-        } else{
+        } else {
             Toast.makeText(getContext(), R.string.member_not_deleted, Toast.LENGTH_SHORT).show();
 
         }
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.help_menu_item)
+            mSnackbar.show();
+        return super.onOptionsItemSelected(item);
+    }
+
+    private int getNumberOfMembers() {
+        String selection = TripContract.MembersEntry.TRIP_ID + "=?";
+        String[] selectionArgs = new String[]{String.valueOf(ContentUris.parseId(mTripUri))};
+        Cursor cursor = getActivity().getContentResolver().query(TripContract.MembersEntry.CONTENT_URI, null, selection, selectionArgs, null);
+
+        int members = cursor.getCount();
+
+        cursor.close();
+
+        return members;
     }
 
 
@@ -179,7 +228,7 @@ public class MembersFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        View container = mEmptyView.findViewById(R.id.container_empty);
+        View container = mEmptyView.findViewById(R.id.container_empty_default);
         container.setVisibility(View.VISIBLE);
         mAdapter.swapCursor(data);
     }

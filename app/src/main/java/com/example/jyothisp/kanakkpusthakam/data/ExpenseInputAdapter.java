@@ -1,51 +1,105 @@
 package com.example.jyothisp.kanakkpusthakam.data;
 
+import android.content.ContentValues;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.database.Cursor;
+import android.support.v4.widget.CursorAdapter;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.jyothisp.kanakkpusthakam.R;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
+public class ExpenseInputAdapter extends CursorAdapter {
 
-public class ExpenseInputAdapter extends ArrayAdapter<Expense> {
+    private Cursor mCursor;
+    private int mStrength;
+    private long[] mIDs;
+    private ContentValues values;
 
-    public ExpenseInputAdapter(@NonNull Context context, ArrayList<Expense> expenses) {
-        super(context, 0, expenses);
+    public ExpenseInputAdapter(Context context, Cursor c, long[] ids) {
+        super(context, c, 0);
+        mStrength = ids.length;
+        mIDs = ids;
+        values = new ContentValues();
+        for (int i = 0; i < mStrength; i++) {
+            values.put("" + mIDs[i], (double) 0);
+        }
     }
 
-    @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        View view = convertView;
-        if (convertView == null){
-            view = LayoutInflater.from(getContext()).inflate(R.layout.input_list_item, parent, false);
-        }
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        View view = LayoutInflater.from(context).inflate(R.layout.expense_input_list_item, parent, false);
 
-        Expense currentExpense = getItem(position);
+        final EditText editText = (EditText) view.findViewById(R.id.input_cash_edit_text);
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-        TextView nameTextView = (TextView) view.findViewById(R.id.input_name_text_view);
-        TextView cashTextView = (TextView) view.findViewById(R.id.input_cash_text_view);
+            }
 
-        String cash = String.format("%.0f", currentExpense.getmCash());
-        nameTextView.setText(currentExpense.getmName());
-        cashTextView.setText(cash);
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                long id = (long) editText.getTag();
+                String cashString = editText.getText().toString().trim();
+                double cash;
+                if (cashString.equals(""))
+                    cash = 0;
+                else
+                    cash = Double.valueOf(cashString);
+                if (values.containsKey("" + id)) {
+                    values.remove("" + id);
+                    values.put("" + id, cash);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         return view;
     }
 
-    private double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+        TextView nameTextView = (TextView) view.findViewById(R.id.input_name_text_view);
+        EditText cashEditText = (EditText) view.findViewById(R.id.input_cash_edit_text);
 
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
+        int nameColumnIndex = cursor.getColumnIndexOrThrow(TripContract.MembersEntry.COLUMN_NAME);
+        int IDColumnIndex = cursor.getColumnIndexOrThrow(TripContract.MembersEntry._ID);
+
+        long id = cursor.getLong(IDColumnIndex);
+        String name = cursor.getString(nameColumnIndex);
+        nameTextView.setText(name);
+
+        cashEditText.setTag(id);
+        double cash = values.getAsDouble("" + id);
+        String cashString = String.valueOf(cash);
+        if (cash != 0)
+            cashEditText.setText(cashString);
+        else
+            cashEditText.setText("");
     }
+
+    public double[] getCashRolled(){
+        double[] cash;
+        cash = new double[mStrength];
+
+        for (int i =0; i<mStrength; i++){
+            cash[i] = values.getAsDouble("" + mIDs[i]);
+            Log.v("ExpenseInputAdapter", "getCashRolled: " + cash[i]);
+
+        }
+
+
+        return cash;
+    }
+
 }

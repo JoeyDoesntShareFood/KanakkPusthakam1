@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -20,9 +21,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -30,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.jyothisp.kanakkpusthakam.data.Expense;
 import com.example.jyothisp.kanakkpusthakam.data.ExpenseCursorAdapter;
 import com.example.jyothisp.kanakkpusthakam.data.TripContract;
 
@@ -50,6 +47,8 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
 
     Uri mTripUri;
 
+    private int mNumberOfMembers;
+
     private View mEmptyView;
 
     private long[] mIDs;
@@ -58,30 +57,35 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_trip_history, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_trip_history, container, false);
 
         getActivity().getSupportLoaderManager().initLoader(1, null, this);
 
 
         mTripUri = getActivity().getIntent().getData();
+        mNumberOfMembers = getNumberOfMembers();
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) rootView.findViewById(R.id.trip_history_fab);
         floatingActionButton.setImageResource(R.drawable.addcoins);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showNewExpenseDialog(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                if (getNumberOfMembers() == 0)
+                    Snackbar.make(rootView.findViewById(R.id.coordinator), R.string.no_members, Snackbar.LENGTH_SHORT).show();
+                else {
+                    showNewExpenseDialog(new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-                        String expenseTitle = mEditText.getText().toString().trim();
+                            String expenseTitle = mEditText.getText().toString().trim();
 
-                        Intent intent = new Intent(getActivity(), ExpenseInputActivity.class);
-                        intent.setData(mTripUri);
-                        intent.putExtra(TripContract.ExpenseEntry.COLUMN_ITEM, expenseTitle);
-                        startActivity(intent);
-                    }
-                });
+                            Intent intent = new Intent(getActivity(), ExpenseInputActivity.class);
+                            intent.setData(mTripUri);
+                            intent.putExtra(TripContract.ExpenseEntry.COLUMN_ITEM, expenseTitle);
+                            startActivity(intent);
+                        }
+                    });
+                }
             }
         });
         mEmptyView = rootView.findViewById(R.id.fragment_empty_view);
@@ -157,7 +161,7 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
         builder.create().show();
     }
 
-    private void getIDsFromDB(){
+    private void getIDsFromDB() {
 
         mIDs = new long[getNumberOfMembers()];
 
@@ -178,51 +182,35 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
 
     private void deleteExpense(long id) {
         String selection = TripContract.ExpenseEntry._ID + "=?";
-        String[] selectionArgs = new String[] {String.valueOf(id)};
+        String[] selectionArgs = new String[]{String.valueOf(id)};
         Cursor cursor = getActivity().getContentResolver().query(TripContract.ExpenseEntry.CONTENT_URI, null, selection, selectionArgs, null);
         int cashRolledColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_CASH_ROLLED);
         int expenseColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_EXPENSE);
+        int involvementColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_IS_INVLOVED);
         Log.v("ExpenseFragment", "onCreate: cashRolledColumnIndex: " + cashRolledColumnIndex);
         cursor.moveToFirst();
         String cashString = cursor.getString(cashRolledColumnIndex);
-        int[] cash = intArrayFromString(cashString);
+        int[] cash = TripUtils.intArrayFromString(cashString, mNumberOfMembers);
         int expense = cursor.getInt(expenseColumnIndex);
+        int[] involvement = TripUtils.intArrayFromString(cursor.getString(involvementColumnIndex), mNumberOfMembers);
         cursor.close();
 
 
-        cash = invertArray(cash);
+        cash = TripUtils.invertArray(cash);
         expense = -expense;
         getIDsFromDB();
-        for (int i =0 ; i<mIDs.length; i++){
+        for (int i = 0; i < mIDs.length; i++) {
             Uri uri = ContentUris.withAppendedId(TripContract.MembersEntry.CONTENT_URI, mIDs[i]);
             ContentValues values = new ContentValues();
             values.put(TripContract.MembersEntry.COLUMN_CASH_SPENT, cash[i]);
-            values.put(TripContract.MembersEntry.COLUMN_EXPENSE, expense);
+            if (involvement[i] == 1)
+                values.put(TripContract.MembersEntry.COLUMN_EXPENSE, expense);
             getActivity().getContentResolver().update(uri, values, null, null);
         }
 
         Uri uri = ContentUris.withAppendedId(TripContract.ExpenseEntry.CONTENT_URI, id);
         getActivity().getContentResolver().delete(uri, null, null);
         Toast.makeText(getContext(), R.string.expense_deleted, Toast.LENGTH_SHORT).show();
-    }
-
-    private int[] intArrayFromString(String s){
-        String splits[] = s.split(",");
-        double[] doubles = new double[getNumberOfMembers()];
-        int[] ints = new int[getNumberOfMembers()];
-        for (int i =0; i<doubles.length; i++){
-            ints[i] = (int) Double.parseDouble(splits[i]);
-            Log.v("Expense Fragment", " " + ints[i]);
-        }
-        return ints;
-    }
-
-    private int[] invertArray(int[] ints){
-        for (int i=0; i<ints.length; i++){
-            ints[i] = - ints[i];
-            Log.v("Expense Fragment", "invertArray: Inverted Array: " + ints[i]);
-        }
-        return ints;
     }
 
 
@@ -236,7 +224,8 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        mEmptyView.setVisibility(View.VISIBLE);
+        View view = mEmptyView.findViewById(R.id.container_empty_two);
+        view.setVisibility(View.VISIBLE);
         mExpenseAdapter.swapCursor(data);
     }
 
@@ -244,7 +233,6 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
     public void onLoaderReset(@NonNull Loader loader) {
         mExpenseAdapter.swapCursor(null);
     }
-
 
 
     private int getNumberOfMembers() {
