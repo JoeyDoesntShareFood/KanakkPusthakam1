@@ -36,6 +36,8 @@ public class TripsCursorAdapter extends CursorAdapter {
         int settlementColumnIndex = cursor.getColumnIndex(TripContract.TripsEntry.COLUMN_IS_SETTLED);
 
         String title = cursor.getString(titleColumnIndex);
+        if (title.equals(""))
+            title = "Unexpected Trip";
         int cash = cursor.getInt(cashColumnIndex);
         String cashString = "₹ " + cash + " per person";
         String date = cursor.getString(dateColumnIndex);

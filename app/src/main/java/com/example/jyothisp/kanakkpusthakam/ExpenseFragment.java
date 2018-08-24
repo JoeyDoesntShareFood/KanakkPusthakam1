@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -20,9 +21,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -30,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.jyothisp.kanakkpusthakam.data.Expense;
 import com.example.jyothisp.kanakkpusthakam.data.ExpenseCursorAdapter;
 import com.example.jyothisp.kanakkpusthakam.data.TripContract;
 
@@ -60,7 +57,7 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_trip_history, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_trip_history, container, false);
 
         getActivity().getSupportLoaderManager().initLoader(1, null, this);
 
@@ -73,18 +70,22 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showNewExpenseDialog(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                if (getNumberOfMembers() == 0)
+                    Snackbar.make(rootView.findViewById(R.id.coordinator), R.string.no_members, Snackbar.LENGTH_SHORT).show();
+                else {
+                    showNewExpenseDialog(new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-                        String expenseTitle = mEditText.getText().toString().trim();
+                            String expenseTitle = mEditText.getText().toString().trim();
 
-                        Intent intent = new Intent(getActivity(), ExpenseInputActivity.class);
-                        intent.setData(mTripUri);
-                        intent.putExtra(TripContract.ExpenseEntry.COLUMN_ITEM, expenseTitle);
-                        startActivity(intent);
-                    }
-                });
+                            Intent intent = new Intent(getActivity(), ExpenseInputActivity.class);
+                            intent.setData(mTripUri);
+                            intent.putExtra(TripContract.ExpenseEntry.COLUMN_ITEM, expenseTitle);
+                            startActivity(intent);
+                        }
+                    });
+                }
             }
         });
         mEmptyView = rootView.findViewById(R.id.fragment_empty_view);
@@ -223,7 +224,8 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        mEmptyView.setVisibility(View.VISIBLE);
+        View view = mEmptyView.findViewById(R.id.container_empty_two);
+        view.setVisibility(View.VISIBLE);
         mExpenseAdapter.swapCursor(data);
     }
 

@@ -16,17 +16,16 @@ import com.example.jyothisp.kanakkpusthakam.data.TripContract;
 
 public class SummaryActivity extends AppCompatActivity {
 
+    private ViewPager viewPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
 
 
-//        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ExpenseFragment()).commit();
 
-
-
-        ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+        viewPager = (ViewPager) findViewById(R.id.view_pager);
 
         viewPager.setAdapter(new TripFragmentPagerAdapter(getSupportFragmentManager()));
 
@@ -59,8 +58,18 @@ public class SummaryActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.members_menu, menu);
+        getMenuInflater().inflate(R.menu.summary_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.help_menu_item);
+        if (viewPager.getCurrentItem() == 0)
+            item.setVisible(true);
+        else
+            item.setVisible(false);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override

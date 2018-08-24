@@ -1,7 +1,6 @@
 package com.example.jyothisp.kanakkpusthakam;
 
 import android.content.ContentUris;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -10,18 +9,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.jyothisp.kanakkpusthakam.data.Expense;
@@ -130,7 +123,7 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.add_member_menu, menu);
+        getMenuInflater().inflate(R.menu.simple_done_menu, menu);
         return true;
     }
 
@@ -141,6 +134,15 @@ public class ExpenseInputActivity extends AppCompatActivity implements LoaderMan
                 long id = ContentUris.parseId(mTripUri);
                 String expenseTitle = getIntent().getStringExtra(TripContract.ExpenseEntry.COLUMN_ITEM);
                 mCashRolled = mAdapter.getCashRolled();
+                int f =0;
+                for (int i=0; i<mCashRolled.length; i++){
+                    if (mCashRolled[i] > 0)
+                        f=1;
+                }
+                if (f == 0){
+                    Toast.makeText(this, R.string.no_money, Toast.LENGTH_SHORT).show();
+                    return false;
+                }
                 Intent intent = new Intent(this, InvolvementActivity.class);
                 intent.putExtra(TripContract.TripsEntry._ID, id);
                 intent.putExtra(TripContract.MembersEntry.COLUMN_NAME, mMembers);
