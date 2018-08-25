@@ -19,7 +19,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -184,7 +183,6 @@ public class ExpenseFragment extends Fragment implements LoaderManager.LoaderCal
         int cashRolledColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_CASH_ROLLED);
         int expenseColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_EXPENSE);
         int involvementColumnIndex = cursor.getColumnIndex(TripContract.ExpenseEntry.COLUMN_IS_INVLOVED);
-        Log.v("ExpenseFragment", "onCreate: cashRolledColumnIndex: " + cashRolledColumnIndex);
         cursor.moveToFirst();
         String cashString = cursor.getString(cashRolledColumnIndex);
         int[] cash = TripUtils.intArrayFromString(cashString, mNumberOfMembers);

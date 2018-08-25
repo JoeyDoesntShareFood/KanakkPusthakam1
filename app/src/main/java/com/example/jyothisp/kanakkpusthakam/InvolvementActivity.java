@@ -12,7 +12,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -82,7 +81,7 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
                 else {
                     addExpense();
                     updateMembers();
-                    String cash = String.format("%.0f", calcExpense());
+                    String cash = String.format("%.1f", calcExpense());
                     Toast.makeText(this, "New expense added, Rs." + cash + " per person", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(this, SummaryActivity.class);
                     intent.setData(ContentUris.withAppendedId(TripContract.TripsEntry.CONTENT_URI, tripID));
@@ -105,8 +104,6 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
         getInvolvement();
         String involvement = TripUtils.intArrayToString(mInvolvement);
         int expense = (int) calcExpense();
-        Log.v("Involvement fragment", "" + expense);
-        Log.v("Involvement fragment", expenseName);
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("hh:mm aaa");
         String timeText = format.format(date);
@@ -142,19 +139,19 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
         calcCashPerPerson();
     }
 
-    private void calcCashPerPerson(){
+    private void calcCashPerPerson() {
         String selection = TripContract.MembersEntry.TRIP_ID + "=?";
         String[] selectionArgs = new String[]{("" + tripID)};
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 TripContract.MembersEntry.COLUMN_EXPENSE
         };
         Cursor cursor = getContentResolver().query(TripContract.MembersEntry.CONTENT_URI, projection, selection, selectionArgs, null);
         int sum = 0;
         int expenseColumnIndex = cursor.getColumnIndex(TripContract.MembersEntry.COLUMN_EXPENSE);
-        while (cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             sum += cursor.getInt(expenseColumnIndex);
         }
-        int cashPerPerson = sum/cursor.getCount();
+        int cashPerPerson = sum / cursor.getCount();
         cursor.close();
 
         ContentValues values = new ContentValues();
@@ -163,20 +160,13 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
         int rows = getContentResolver().update(TripContract.TripsEntry.CONTENT_URI, values, selection, selectionArgs);
     }
 
-    //TODO: deal with no expense input;
-
     private double calcExpense() {
         double membersInExpense = mAdapter.getSelectedItemsID().size();
         double totalCash = 0;
         for (int i = 0; i < mCashRolled.length; i++)
             totalCash += mCashRolled[i];
-        try {
-            double expense = totalCash / membersInExpense;
-            return expense;
-        } catch (ArithmeticException e) {
-            Log.e("InvolvementActivity", "calcExpense: /0", e);
-        }
-        return 0;
+        return totalCash / membersInExpense;
+
     }
 
     private void getInvolvement() {
@@ -188,7 +178,6 @@ public class InvolvementActivity extends AppCompatActivity implements LoaderMana
                 mInvolvement[i] = 0;
         }
     }
-
 
 
     @NonNull

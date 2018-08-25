@@ -70,7 +70,7 @@ public class AddMemberActivity extends AppCompatActivity {
         long newRowID = ContentUris.parseId(memberUri);
         mEditText.setText("");
 
-        Toast.makeText(this, "New row id " + newRowID, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, memberName + " added to trip.", Toast.LENGTH_SHORT).show();
     }
 
     public void clear(View view) {
