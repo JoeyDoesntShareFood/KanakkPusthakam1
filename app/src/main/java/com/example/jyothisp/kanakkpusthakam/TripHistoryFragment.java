@@ -151,7 +151,7 @@ public class TripHistoryFragment extends Fragment implements LoaderManager.Loade
 
         long newRowID = ContentUris.parseId(uri);
 
-        Toast.makeText(getContext(), "New row id " + newRowID , Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), title + " trip started." , Toast.LENGTH_SHORT).show();
 
         return uri;
 

@@ -13,15 +13,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.jyothisp.kanakkpusthakam.data.Expense;
 import com.example.jyothisp.kanakkpusthakam.data.ExpenseInputAdapter;
 import com.example.jyothisp.kanakkpusthakam.data.TripContract;
 
-import java.util.ArrayList;
 
 public class ExpenseInputActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 

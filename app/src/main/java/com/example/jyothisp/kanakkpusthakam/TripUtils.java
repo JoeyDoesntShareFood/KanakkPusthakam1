@@ -1,6 +1,5 @@
 package com.example.jyothisp.kanakkpusthakam;
 
-import android.util.Log;
 
 public final class TripUtils {
 
@@ -12,7 +11,6 @@ public final class TripUtils {
         int[] ints = new int[strength];
         for (int i =0; i<doubles.length; i++){
             ints[i] = (int) Double.parseDouble(splits[i]);
-            Log.v("Expense Fragment", " " + ints[i]);
         }
         return ints;
     }
@@ -20,7 +18,6 @@ public final class TripUtils {
     public static int[] invertArray(int[] ints){
         for (int i=0; i<ints.length; i++){
             ints[i] = - ints[i];
-            Log.v("Expense Fragment", "invertArray: Inverted Array: " + ints[i]);
         }
         return ints;
     }
@@ -34,7 +31,6 @@ public final class TripUtils {
             string += ",";
         }
         string += intArray[i];
-        Log.v("Involvement fragment1", string);
 
         return string;
     }
@@ -47,7 +43,6 @@ public final class TripUtils {
             string += ",";
         }
         string += intArray[i];
-        Log.v("Involvement fragment", string);
         return string;
     }
 
